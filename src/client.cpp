@@ -113,11 +113,7 @@ int main(int argc, char *argv[]){
     cout << setw(25)<< "Server's IP address: " << setw(10) << serverIP << endl;
     cout << setw(25) << "Server's port: " << setw(10) <<  serverPort << endl;
     cout << endl;
-/*
-    if(bind(sockfd, (struct sockaddr *)&clientAddr, sizeof(clientAddr)) < 0){
-        cerr << "failed to bind\n";
-        exit(1);
-    }*/
+
     connect2Server(); 
 
     cout << "(requested tasks)" << endl;

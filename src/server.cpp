@@ -53,10 +53,8 @@ int dup_cnt = 0;
 int pre_ack=-1;
 
 int addr_len;
-int get_ind(pid_t p) ;
-void transmit(string filename);
 void calc(string expression);
-void dns(string domain);
+
 
 void *recv_thread(void *arg);
 
@@ -97,7 +95,7 @@ int main(int argc, char *argv[]){
 
     sockfd = socket(AF_INET, SOCK_DGRAM, 0);
     serverAddr.sin_port = atoi(argv[1]);
-    //setsockopt(sockfd, SOL_SOCKET, SO_SNDTIMEO, &SOVT, sizeof(RTT));
+
     ROVT.tv_sec = 1;
     ROVT.tv_usec = 0;
     setsockopt(sockfd, SOL_SOCKET, SO_RCVTIMEO, &ROVT, sizeof(ROVT));
@@ -203,7 +201,7 @@ int main(int argc, char *argv[]){
             cout << "pkt_data: " << pkt_recv.data << endl;
             ifstream file(pkt_recv.data, ios::in | ios::binary);
             if (file.is_open()){
-                //cout << "(" << clientcnt << ")" << file.gcount() << " bytes read\n";
+                
                 pkt_send.seq_num = pkt_recv.ack_num;
                 int f=1;
                 while(!file.eof()){
@@ -217,8 +215,6 @@ int main(int argc, char *argv[]){
                     }
                     pkt_send.data_len = file.gcount();
                     file_pkts.push_back(pkt_send);
-                    //cout << "file packet : SEQ = " << pkt_send.seq_num << " : ACK = " << pkt_send.ack_num << endl;
-                    //cout << "file packet : data = " << pkt_send.data << endl;
                     pkts_stat[pkt_send.seq_num] = 1;
                     pkt_send.seq_num += pkt_send.data_len;
                     memset(pkt_send.data, 0, MSS);
@@ -233,8 +229,6 @@ int main(int argc, char *argv[]){
                 bzero(pkt_send.data, sizeof(pkt_send.data));
                 pkt_send.data_len = 0;
                 pkt_send.ack_num = pkt_recv.seq_num + file_pkts.size();
-                //cout << "pkt_size: " << file_pkts.size() << endl;
-                //cout << "pkt_ack: " << pkt_send.ack_num << endl;
                 pkt_send.seq_num = pkt_recv.ack_num;    
                 int lflag=1;
                 while(true){
@@ -251,7 +245,6 @@ int main(int argc, char *argv[]){
                         break;
                     }
                     cout << "retry" << endl;
-                    //usleep(20000);
                 }
                 
                 pthread_t recv_thread_t;
@@ -262,7 +255,6 @@ int main(int argc, char *argv[]){
                     int stat;
                     usleep(1000);
                     pthread_mutex_lock(&Mutex);
-                    //int con =  accumulate(pkts_stat.begin(), pkts_stat.end(), 0, [](int sum, pair<unsigned int, int> p){return sum + p.second;});
                     if (notacked == 0){
                         cout << "transmission complete\n";
                         pthread_mutex_unlock(&Mutex);
@@ -437,7 +429,6 @@ void *recv_thread( void *arg){
                 else if(stat == 2){
                     cout << "receive packet (" <<  pid <<  "): ACK : SEQ = " << pkt_recv.seq_num << " : ACK = " << pkt_recv.ack_num << endl;
                     rwnd-=pkt_recv.data_len;
-                    //setsockopt(sockfd, SOL_SOCKET, SO_RCVBUF, &rwnd, sizeof(rwnd));
                     if (send_base == pkt_recv.ack_num - MSS){
                         timer = 0;
                     }
@@ -470,7 +461,6 @@ void *recv_thread( void *arg){
             }
             pre_ack = pkt_recv.ack_num;
         }
-        //usleep(200);
         pthread_mutex_unlock(&Mutex);
     }
     cout << "thread quit" << endl;
